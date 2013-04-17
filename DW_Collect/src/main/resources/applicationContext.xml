@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:aop="http://www.springframework.org/schema/aop" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:jee="http://www.springframework.org/schema/jee" xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd   http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd   http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd   http://www.springframework.org/schema/jee http://www.springframework.org/schema/jee/spring-jee-3.0.xsd   http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">
+	<!-- aop -->
+	<context:property-placeholder location="classpath*:META-INF/spring/*.properties" />
+	<bean id="exceptionProxy" class="com.zjcy.point.aop.ExceptionProxy"></bean>
+
+	<!-- -->
+	<context:spring-configured />
+	<!-- -->
+	<context:component-scan base-package="com.zjcy.point">
+		<context:exclude-filter expression=".*_Roo_.*"
+			type="regex" />
+		<context:exclude-filter expression="org.springframework.stereotype.Controller"
+			type="annotation" />
+	</context:component-scan>
+	<!-- JDBC Datasource -->
+	<!--
+	<bean class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close" id="dataSource">
+		<property name="driverClassName" value="${database.driverClassName}" />
+		<property name="url" value="${database.url}" />
+		<property name="username" value="${database.username}" />
+		<property name="password" value="${database.password}" />
+		<property name="characterEncoding" value="UTF-8" />
+	</bean>-->
+
+	<context:annotation-config />
+	<bean id="dataSource" class="org.springframework.jndi.JndiObjectFactoryBean"> 
+		<property name="jndiName" value="java:comp/env/jdbc/NgbossDB" /> </bean> 
+	<bean
+		class="org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean"
+		id="entityManagerFactory">
+		<property name="dataSource" ref="dataSource" />
+		<property name="persistenceUnitName" value="persistenceUnit" />
+	</bean>
+	<bean class="org.springframework.orm.jpa.JpaTransactionManager"
+		id="transactionManager">
+		<property name="entityManagerFactory" ref="entityManagerFactory" />
+	</bean>
+	<bean id="jpaTemplate" class="org.springframework.orm.jpa.JpaTemplate">
+		<property name="entityManagerFactory" ref="entityManagerFactory"></property>
+	</bean>
+	
+	 <!--  Kaptcha相差配置 -->
+<!-- 	<bean id="captchaProducer" class="com.google.code.kaptcha.impl.DefaultKaptcha">  
+        <property name="config">  
+            <bean class="com.google.code.kaptcha.util.Config">  
+                <constructor-arg>  
+                    <props>  
+                        <prop key="kaptcha.border">no</prop>  
+                        <prop key="kaptcha.border.color">105,179,90</prop>  
+                        <prop key="kaptcha.textproducer.font.color">red</prop>  
+                        <prop key="kaptcha.image.width">250</prop>  
+                        <prop key="kaptcha.textproducer.font.size">90</prop>  
+                        <prop key="kaptcha.image.height">90</prop>  
+                        <prop key="kaptcha.session.key">code</prop>  
+                        <prop key="kaptcha.textproducer.char.length">4</prop>  
+                        <prop key="kaptcha.textproducer.font.names">宋体,楷体,微软雅黑</prop>  
+                    </props>  
+                </constructor-arg>  
+            </bean>  
+        </property>  
+    </bean>   -->
+	
+	<tx:annotation-driven mode="aspectj"
+		transaction-manager="transactionManager" />
+</beans>
